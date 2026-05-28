@@ -103,6 +103,13 @@ const areaCellColor = (area: string) => {
 const barWidth = (value: number, max: number) => `${Math.min(100, (Number(value || 0) / Math.max(1, max)) * 100)}%`;
 
 export default function CineOpsDashboard() {
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/`)
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((err) => console.error(err));
+  }, []);
+
   const [subVista, setSubVista] = useState<Vista>("mapa");
   const [horaSeleccionada, setHoraSeleccionada] = useState("16:00");
   const [diaSeleccionada, setDiaSeleccionada] = useState("Sábado");
@@ -768,6 +775,7 @@ export default function CineOpsDashboard() {
                           const id = idOf(c);
                           const tieneFalta = faltasHoy[id] || c.estado === "Falta";
                           const tieneDescanso = descansosHoy[id] || String(c.estado).includes("Descanso manual");
+                          
                           return <tr key={id} className={`hover:bg-slate-50/60 transition-colors ${tieneFalta ? "bg-rose-50" : tieneDescanso ? "bg-sky-50" : ""}`}><td className="p-2.5 pl-4 font-mono font-bold text-slate-500">{id}</td><td className={`p-2.5 font-bold ${tieneFalta ? "line-through text-slate-400" : "text-slate-900"}`} title={fixText(c.nombre)}>{fixText(c.nombre)}</td><td className="p-2 text-center"><button onClick={() => marcarFaltaBackend(c)} className={`px-3 py-1 rounded font-black text-[9px] tracking-wide border transition-all ${tieneFalta ? "bg-rose-600 text-white border-rose-700" : "bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50"}`}>{tieneFalta ? "FALTA" : "EN PISO"}</button><button onClick={() => marcarDescansoManualBackend(c)} className={`ml-1 px-3 py-1 rounded font-black text-[9px] tracking-wide border transition-all ${tieneDescanso ? "bg-sky-600 text-white border-sky-700" : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"}`}>{tieneDescanso ? "DESCANSO" : "DESCANSO"}</button></td></tr>;
                         })}
                       </tbody>
@@ -782,3 +790,4 @@ export default function CineOpsDashboard() {
     </div>
   );
 }
+
