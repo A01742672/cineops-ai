@@ -1166,3 +1166,10 @@ def optimize_schedule(req: OptimizationRequest):
 @app.post("/asignar")
 def generar_asignaciones(req: OptimizationRequest):
     return optimize_weekly(req)
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"message": "CineOps API funcionando 🚀"}
