@@ -3,6 +3,7 @@ import math
 import time
 import hashlib
 import unicodedata
+import traceback
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set, Tuple
@@ -789,6 +790,9 @@ async def upload_excel(file: UploadFile = File(...)):
     global DB_EMPLEADOS, ULTIMO_EXCEL_BYTES, PLAN_CACHE_KEY, ASISTENCIAS_REGISTRADAS, DESCANSOS_MANUALES
     try:
         content = await file.read()
+        if not content:
+            raise HTTPException(status_code=400, detail="Archivo vacío")
+        
         path = "/tmp/empleados.xlsx"
         with open(path, "wb") as f:
             f.write(content)
@@ -881,11 +885,13 @@ async def upload_excel(file: UploadFile = File(...)):
             "demanda_semana": TOTAL_ASISTENTES_SEMANA,
             "solver": resp,
         }
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al procesar Excel: {str(e)}")
-
+        import traceback 
+        print(traceback.format_exc())
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al procesar Excel: {str(e)}"
+    )
 
 # =====================================================================
 # ASISTENCIA Y DESCANSOS
@@ -1043,12 +1049,18 @@ def plan_resumen_empleados() -> List[dict]:
             "dias": dias_info, "horas_semana": calcular_horas_plan(empleado_id=emp_id), "cambios": cambios,
         })
     return rows
-
+import os
+TMP_FILE = "/tmp/empleados.xlsx"
 
 @app.post("/kpis")
 def get_kpis(req: KPIRequest = Body(...)):
-    if not DB_EMPLEADOS and not os.path.exists("/tmp/empleados.xlsx"):
-        raise HTTPException(status_code=400, detail="Primero sube el Excel.")
+    if not DB_EMPLEADOS:
+        if os.path.exists(TMP_FILE):
+            xls = pd.ExcelFile(TMP_FILE)
+            # aquí podrías reconstruir si quieres
+        else:
+            raise HTTPException(status_code=400, detail="Primero sube el Excel.")
+        
     if not DB_EMPLEADOS:
         xls = pd.ExcelFile("/tmp/empleados.xlsx")
         df = pd.read_excel(xls)
