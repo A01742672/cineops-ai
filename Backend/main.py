@@ -876,7 +876,11 @@ async def upload_excel(file: UploadFile = File(...)):
         if not empleados:
             raise HTTPException(status_code=400, detail="No se encontraron empleados válidos en el Excel.")
         DB_EMPLEADOS = empleados
+
         construir_plan_excel_base()
+        print("UPLOAD OK")
+        print("EMP:", len(DB_EMPLEADOS))
+        
         resp = optimize_weekly(OptimizationRequest())
         return {
             "status": "success",
@@ -891,7 +895,7 @@ async def upload_excel(file: UploadFile = File(...)):
         raise HTTPException(
             status_code=500,
             detail=f"Error al procesar Excel: {str(e)}"
-    )
+        )
 
 # =====================================================================
 # ASISTENCIA Y DESCANSOS
