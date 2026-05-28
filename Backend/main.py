@@ -788,10 +788,10 @@ def optimize_weekly(req: OptimizationRequest):
 async def upload_excel(file: UploadFile = File(...)):
     global DB_EMPLEADOS, ULTIMO_EXCEL_BYTES, PLAN_CACHE_KEY, ASISTENCIAS_REGISTRADAS, DESCANSOS_MANUALES
     try:
+        content = await file.read()
         path = "/tmp/empleados.xlsx"
         with open(path, "wb") as f:
             f.write(content)
-        content = await file.read()
         ASISTENCIAS_REGISTRADAS = {}
         DESCANSOS_MANUALES = {}
         PLAN_CACHE_KEY = None
