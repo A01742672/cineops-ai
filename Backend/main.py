@@ -26,6 +26,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def home():
+    return {"message": "CineOps API funcionando 🚀"}
+
 # =====================================================================
 # ESTADO EN MEMORIA: EL EXCEL ORIGINAL NO SE MODIFICA
 # =====================================================================
@@ -1161,15 +1165,3 @@ def obtener_reporte_semanal():
 @app.post("/optimize")
 def optimize_schedule(req: OptimizationRequest):
     return optimize_weekly(req)
-
-
-@app.post("/asignar")
-def generar_asignaciones(req: OptimizationRequest):
-    return optimize_weekly(req)
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/")
-def home():
-    return {"message": "CineOps API funcionando 🚀"}
