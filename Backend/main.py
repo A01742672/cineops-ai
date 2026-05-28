@@ -16,13 +16,16 @@ try:
 except Exception:  # Permite correr modo heurístico si OR-Tools no está instalado.
     cp_model = None
 
-app = FastAPI(title="CineOps DSS Ultra Fast Optimizer")
+app = FastAPI(title="CineOps DSS")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://cineops-ai-1.onrender.com",
+        "https://cineops-ai.onrender.com",
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -1165,3 +1168,4 @@ def obtener_reporte_semanal():
 @app.post("/optimize")
 def optimize_schedule(req: OptimizationRequest):
     return optimize_weekly(req)
+
