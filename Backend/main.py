@@ -3,6 +3,7 @@ import math
 import time
 import hashlib
 import unicodedata
+import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -787,8 +788,10 @@ def optimize_weekly(req: OptimizationRequest):
 async def upload_excel(file: UploadFile = File(...)):
     global DB_EMPLEADOS, ULTIMO_EXCEL_BYTES, PLAN_CACHE_KEY, ASISTENCIAS_REGISTRADAS, DESCANSOS_MANUALES
     try:
+        path = "/tmp/empleados.xlsx"
+        with open(path, "wb") as f:
+            f.write(content)
         content = await file.read()
-        ULTIMO_EXCEL_BYTES = content
         ASISTENCIAS_REGISTRADAS = {}
         DESCANSOS_MANUALES = {}
         PLAN_CACHE_KEY = None
@@ -1044,8 +1047,13 @@ def plan_resumen_empleados() -> List[dict]:
 
 @app.post("/kpis")
 def get_kpis(req: KPIRequest = Body(...)):
-    if not DB_EMPLEADOS:
+    if not DB_EMPLEADOS and not os.path.exists("/tmp/empleados.xlsx"):
         raise HTTPException(status_code=400, detail="Primero sube el Excel.")
+    if not DB_EMPLEADOS:
+        xls = pd.ExcelFile("/tmp/empleados.xlsx")
+        df = pd.read_excel(xls)
+        DB_EMPLEADOS = df.to_dict(orient="records")
+    
     if not PLAN_OPTIMIZADO:
         optimize_weekly(OptimizationRequest())
     dia = normalizar_dia(req.dia)
